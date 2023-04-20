@@ -5,6 +5,7 @@ import getpass
 
 class Settings:
     SETTINGS_FILENAME = "settings.ini"
+    BASE_SETTINGS = "base_settings.ini"
 
     def __init__(self, settings_parameter):
         if os.path.isfile(settings_parameter):
@@ -33,8 +34,21 @@ class Settings:
         print("loading settings...")
 
         if os.path.isfile(self.absSettingsDirName):
+            candidates = [self.absSettingsDirName]
+
+            base_settings = os.path.join(
+                os.path.dirname(self.absSettingsDirName), self.BASE_SETTINGS
+            )
+            print(base_settings)
+            if os.path.exists(base_settings):
+                candidates.append(base_settings)
+
+            secrets_file = os.path.splitext(self.absSettingsDirName)[0] + ".secrets.ini"
+            if os.path.exists(secrets_file):
+                candidates.append(secrets_file)
             self.__config = configparser.ConfigParser()
-            self.__config.read(self.absSettingsDirName)
+            self.__config.read(candidates)
+
             try:
                 if not self.__isSettingNameFilledInConfig("user"):
                     self.__config["DEFAULT"]["user"] = self.__getInputForString(
